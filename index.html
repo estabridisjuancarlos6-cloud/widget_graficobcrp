@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gráfico IPC Lima Metropolitana</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @font-face {
+      font-family: 'BlissLight';
+      src: url('font/BlissLight Regular.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: "BlissLight", sans-serif;
+      background: #f7f7f7;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden; /* evita scroll */
+    }
+
+    /* 🔹 Título superior */
+    h2 {
+      text-align: center;
+      color: #373359;
+      margin: 4px 0 2px 0;
+      font-size: clamp(0.8rem, 2vw, 1rem);
+      flex-shrink: 0;
+    }
+
+    /* 🔹 Contenedor principal que ajusta el alto total */
+    .chart-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 4px 8px;
+      box-sizing: border-box;
+      height: calc(100vh - 40px); /* ajusta dinámicamente al alto visible */
+    }
+
+    /* 🔹 Caja blanca del gráfico */
+    .chart-container {
+      flex: 1;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    canvas {
+      flex: 1;
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain;
+    }
+
+    /* 🔹 Fuente al pie */
+    .fuente {
+      font-size: 0.6em;
+      color: #666;
+      text-align: center;
+      margin: 4px 0 0 0;
+    }
+  </style>
+</head>
+<body>
+  <h2>Índice de Precios al Consumidor (IPC) Lima Metropolitana (Índice 2009=100)</h2>
+
+  <div class="chart-wrapper">
+    <div class="chart-container">
+      <canvas id="ipcChart"></canvas>
+    </div>
+    <p class="fuente">Fuente: Base de Datos BCRPData</p>
+  </div>
+
+  <script>
+    async function fetchAndRenderIPCChart() {
+      const SERIES_ID = "PN01270PM";
+      const ENDPOINT = `https://estadisticas.bcrp.gob.pe/estadisticas/series/api/${SERIES_ID}/json/2020-01/actual`;
+
+      try {
+        const response = await fetch(ENDPOINT);
+        if (!response.ok) throw new Error(`Error de red: ${response.status}`);
+        const data = await response.json();
+
+        const periodos = [];
+        const ipcValores = [];
+
+        data.periods.forEach(period => {
+          periodos.push(period.name);
+          ipcValores.push(parseFloat(period.values[0]));
+        });
+
+        const ctx = document.getElementById('ipcChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: periodos,
+            datasets: [{
+              label: 'IPC Base 2009=100',
+              data: ipcValores,
+              borderColor: '#0077B6',
+              backgroundColor: 'rgba(0, 119, 182, 0.15)',
+              borderWidth: 2,
+              tension: 0.4,
+              pointRadius: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+              padding: 6
+            },
+            scales: {
+              x: {
+                ticks: {
+                  maxTicksLimit: 12,
+                  font: ctx => ({ size: Math.max(6, ctx.chart.width / 80) }),
+                  callback: function(val) {
+                    const label = this.getLabelForValue(val);
+                    return label.startsWith('Ene') ? label.substring(4) : null;
+                  }
+                }
+              },
+              y: {
+                beginAtZero: false,
+                title: {
+                  display: true,
+                  text: 'Índice (2009=100)',
+                  font: { size: 10 }
+                },
+                ticks: {
+                  font: ctx => ({ size: Math.max(6, ctx.chart.height / 80) })
+                }
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                mode: 'index',
+                intersect: false,
+                bodyFont: { size: 10 }
+              }
+            }
+          }
+        });
+      } catch (error) {
+        console.error("Error al obtener los datos:", error);
+        document.getElementById('ipcChart').parentNode.innerHTML =
+          '<p style="text-align: center; color: red;">Error al cargar los datos del IPC.</p>';
+      }
+    }
+
+    fetchAndRenderIPCChart();
+  </script>
+</body>
+</html>
