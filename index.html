@@ -85,19 +85,21 @@
   <script>
     async function fetchAndRenderIPCChart() {
       const SERIES_ID = "PN01270PM";
-      const CORS_PROXY = "https://cors-anywhere.herokuapp.com/";
+      const CORS_PROXY = "https://api.allorigins.win/get?url=";
       const ENDPOINT = `https://estadisticas.bcrp.gob.pe/estadisticas/series/api/${SERIES_ID}/json/2020-01/actual`;
-      const API_URL = CORS_PROXY + ENDPOINT;
+      const API_URL = `${CORS_PROXY}${encodeURIComponent(ENDPOINT)}`;
 
       try {
         const response = await fetch(API_URL);
         if (!response.ok) throw new Error(`Error de red: ${response.status}`);
         const data = await response.json();
 
+        var object = JSON.parse(data.contents);
+
         const periodos = [];
         const ipcValores = [];
 
-        data.periods.forEach(period => {
+        object.periods.forEach(period => {
           periodos.push(period.name);
           ipcValores.push(parseFloat(period.values[0]));
         });
