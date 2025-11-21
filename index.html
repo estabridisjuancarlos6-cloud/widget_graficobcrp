@@ -47,7 +47,7 @@
     .chart-container {
       flex: 1;
       background-color: white;
-      border-radius: 17px;
+      border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       position: relative;
       display: flex;
@@ -84,22 +84,17 @@
 
   <script>
     async function fetchAndRenderIPCChart() {
-      const SERIES_ID = "PN01270PM";
-      const CORS_PROXY = "https://api.allorigins.win/get?url=";
-      const ENDPOINT = `https://estadisticas.bcrp.gob.pe/estadisticas/series/api/${SERIES_ID}/json/2020-01/actual`;
-      const API_URL = `${CORS_PROXY}${encodeURIComponent(ENDPOINT)}`;
+      const API_URL = `https://fred-proxy.bertolfranco26.workers.dev/bcrp?series=PN01270PM&start=2020-01&end=actual`;
 
       try {
         const response = await fetch(API_URL);
         if (!response.ok) throw new Error(`Error de red: ${response.status}`);
         const data = await response.json();
 
-        var object = JSON.parse(data.contents);
-
         const periodos = [];
         const ipcValores = [];
 
-        object.periods.forEach(period => {
+        data.periods.forEach(period => {
           periodos.push(period.name);
           ipcValores.push(parseFloat(period.values[0]));
         });
@@ -169,4 +164,3 @@
   </script>
 </body>
 </html>
-
