@@ -1,10 +1,26 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src
+    'self'
+    https://cdn.jsdelivr.net
+    'nonce-chart';
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data:;
+  connect-src https://fred-proxy.bertolfranco26.workers.dev;
+  font-src 'self';
+  object-src 'none';
+">
   <title>Gráfico IPC Lima Metropolitana</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script
+  src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"
+  integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4"
+  crossorigin="anonymous"></script>
   <style>
     @font-face {
       font-family: 'BlissLight';
@@ -13,14 +29,16 @@
       font-style: normal;
     }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       height: 100%;
       font-family: "BlissLight", sans-serif;
       display: flex;
       flex-direction: column;
-      overflow: hidden; /* evita scroll */
+      overflow: hidden;
+      /* evita scroll */
     }
 
     /* 🔹 Título superior */
@@ -40,7 +58,8 @@
       justify-content: space-between;
       padding: 4px 8px;
       box-sizing: border-box;
-      height: calc(100vh - 40px); /* ajusta dinámicamente al alto visible */
+      height: calc(100vh - 40px);
+      /* ajusta dinámicamente al alto visible */
     }
 
     /* 🔹 Caja blanca del gráfico */
@@ -71,6 +90,7 @@
     }
   </style>
 </head>
+
 <body>
   <h2>Tasa del BCRP</h2>
 
@@ -81,7 +101,7 @@
     <p class="fuente">Fuente: Base de Datos BCRPData</p>
   </div>
 
-  <script>
+  <script nonce="chart">
     async function fetchAndRenderIPCChart() {
       const API_URL = `https://fred-proxy.bertolfranco26.workers.dev/bcrp?series=PN01270PM&start=2020-01&end=actual`;
 
@@ -124,7 +144,7 @@
                 ticks: {
                   maxTicksLimit: 12,
                   font: ctx => ({ size: Math.max(6, ctx.chart.width / 80) }),
-                  callback: function(val) {
+                  callback: function (val) {
                     const label = this.getLabelForValue(val);
                     return label.startsWith('Ene') ? label.substring(4) : null;
                   }
@@ -162,5 +182,5 @@
     fetchAndRenderIPCChart();
   </script>
 </body>
-</html>
 
+</html>
